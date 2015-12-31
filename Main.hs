@@ -17,12 +17,12 @@ findNodes = attributeIs "class" "story-heading" >=> child
 extractData = T.concat . content
 
 -- Remove leading and trailing whitespace and newlines.
-cleanContent :: T.Text -> T.Text
-cleanContent = (T.replace "\n" "") . T.strip
+cleanContent :: [T.Text] -> [T.Text]
+cleanContent = filter (not . T.null) . (fmap T.strip)
 
 -- Handle selected data from page.
 processData :: [T.Text] -> IO ()
-processData = putStrLn . T.unpack . (cleanContent . T.concat)
+processData = (mapM_ putStrLn) . ((fmap T.unpack) . cleanContent)
 
 -- Get a Cursor for the specified URL.
 cursorFor :: String -> IO Cursor
