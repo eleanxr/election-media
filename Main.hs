@@ -11,12 +11,13 @@ url = "http://www.nytimes.com"
 
 -- Selector for headline nodes.
 findNodes :: Cursor -> [Cursor]
-findNodes = attributeIs "class" "story-heading" >=> child
+findNodes = attributeIs "class" "story-heading" >=> ($// child)
 
 -- Extract text content from selected nodes.
 extractData = T.concat . content
 
--- Remove leading and trailing whitespace and newlines.
+-- Remove leading and trailing whitespace and newlines and remove
+-- empty values.
 cleanContent :: [T.Text] -> [T.Text]
 cleanContent = filter (not . T.null) . (fmap T.strip)
 
