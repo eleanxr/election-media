@@ -6,6 +6,8 @@ import qualified Data.Text as T
 import Text.HTML.DOM (parseLBS)
 import Text.XML.Cursor (Cursor, attributeIs, content, element,
     fromDocument, child, ($//), (&|), (&//), (>=>))
+import NLP.POS (defaultTagger, tagText)
+import Control.Monad
 
 url = "http://www.nytimes.com"
 
@@ -21,9 +23,20 @@ extractData = T.concat . content
 cleanContent :: [T.Text] -> [T.Text]
 cleanContent = filter (not . T.null) . (fmap T.strip)
 
+tagHeadlines :: [T.Text] -> IO [T.Text]
+tagHeadlines lines = do
+    tagger <- defaultTagger
+    return $ map (tagText tagger) lines
+
 -- Handle selected data from page.
 processData :: [T.Text] -> IO ()
-processData = (mapM_ putStrLn) . ((fmap T.unpack) . cleanContent)
+--processData = (mapM_ putStrLn) . (unpackAll . tagHeadlines . cleanContent)
+--    where unpackAll texts = map T.unpack texts
+processData texts = do
+    lines <- return $ cleanContent texts
+    taggedLines <- tagHeadlines lines
+    strings <- return $ map T.unpack taggedLines
+    mapM_ putStrLn strings
 
 -- Get a Cursor for the specified URL.
 cursorFor :: String -> IO Cursor

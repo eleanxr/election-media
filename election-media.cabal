@@ -25,6 +25,7 @@ executable election-media
     http-conduit,
     xml-conduit,
     html-conduit,
-    text
+    text,
+    chatter
   -- hs-source-dirs:
   default-language:    Haskell2010
