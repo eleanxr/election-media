@@ -6,7 +6,7 @@ import qualified Data.Text as T
 import Text.HTML.DOM (parseLBS)
 import Text.XML.Cursor (Cursor, attributeIs, content, element,
     fromDocument, child, ($//), (&|), (&//), (>=>))
-import NLP.POS (defaultTagger, tagText)
+import NLP.POS (defaultTagger, brownTagger, conllTagger, tagText)
 import Control.Monad
 
 url = "http://www.nytimes.com"
@@ -21,7 +21,7 @@ extractData = T.concat . content
 -- Remove leading and trailing whitespace and newlines and remove
 -- empty values.
 cleanContent :: [T.Text] -> [T.Text]
-cleanContent = filter (not . T.null) . (fmap T.strip)
+cleanContent = filter (not . T.null) . (fmap $ T.strip)
 
 tagHeadlines :: [T.Text] -> IO [T.Text]
 tagHeadlines lines = do
@@ -30,8 +30,6 @@ tagHeadlines lines = do
 
 -- Handle selected data from page.
 processData :: [T.Text] -> IO ()
---processData = (mapM_ putStrLn) . (unpackAll . tagHeadlines . cleanContent)
---    where unpackAll texts = map T.unpack texts
 processData texts = do
     lines <- return $ cleanContent texts
     taggedLines <- tagHeadlines lines
