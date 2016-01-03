@@ -30,11 +30,9 @@ tagHeadlines lines = do
 
 -- Handle selected data from page.
 processData :: [T.Text] -> IO ()
-processData texts = do
-    lines <- return $ cleanContent texts
-    taggedLines <- tagHeadlines lines
-    strings <- return $ map T.unpack taggedLines
-    mapM_ putStrLn strings
+processData texts =
+    tagHeadlines (cleanContent texts) >>= \taggedLines ->
+    mapM_ putStrLn $ map T.unpack taggedLines
 
 -- Get a Cursor for the specified URL.
 cursorFor :: String -> IO Cursor
