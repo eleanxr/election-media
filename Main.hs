@@ -8,6 +8,7 @@ import Text.XML.Cursor (Cursor, attributeIs, content, element,
     fromDocument, child, ($//), (&|), (&//), (>=>))
 import NLP.POS (defaultTagger, brownTagger, conllTagger, tagText)
 import Control.Monad
+import HeadlineDB
 
 url = "http://www.nytimes.com"
 
