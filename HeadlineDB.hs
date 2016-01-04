@@ -1,9 +1,21 @@
-module HeadlineDB where
+module HeadlineDB (connect) where
 
 import Database.HDBC
 import Database.HDBC.Sqlite3
 import Control.Monad (when)
 import Data.List
+
+import DeclareDB
+
+nounTable = Table "noun" [
+    Column "noun_id" Integer [NonNull, PrimaryKey, AutoIncrement],
+    Column "noun" Text [Unique, NonNull]
+    ]
+
+headlineTable = Table "headline" [
+    Column "headline_id" Integer [NonNull, PrimaryKey, AutoIncrement],
+    Column "headline" Text [NonNull]
+    ]
 
 connect :: FilePath -> IO Connection
 connect path = do
@@ -14,13 +26,10 @@ connect path = do
 initializeTables :: IConnection conn => conn -> IO ()
 initializeTables dbh = do
     tables <- getTables dbh
-    when (not ("nouns" `elem` tables)) $ do
-        run dbh (createTableSQL "nouns" "noun_id" ["noun NOT NULL UNIQUE"]) []
+    when (not ("noun" `elem` tables)) $ do
+        run dbh (sqlCreateTable nounTable) []
+        return ()
+    when (not ("headline" `elem` tables)) $ do
+        run dbh (sqlCreateTable headlineTable) []
         return ()
     commit dbh
-
-createTableSQL :: String -> String -> [String] -> String
-createTableSQL name pk columns = createStmt ++ " (" ++ columnStmt ++ ")" where
-        createStmt = "CREATE TABLE " ++ name
-        columnStmt = intercalate "," $
-            [pk ++ " INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT"] ++ columns
