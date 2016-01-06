@@ -6,7 +6,10 @@ import qualified Data.Text as T
 import Text.HTML.DOM (parseLBS)
 import Text.XML.Cursor (Cursor, attributeIs, content, element,
     fromDocument, child, ($//), (&|), (&//), (>=>))
-import NLP.POS (defaultTagger, brownTagger, conllTagger, tagText)
+import NLP.POS (defaultTagger, brownTagger, conllTagger, tagText, tag)
+import NLP.Types (POSTagger)
+import NLP.Types.Tree (TaggedSentence)
+import NLP.Types.Tags (Tag)
 import Control.Monad
 import HeadlineDB
 
@@ -24,16 +27,16 @@ extractData = T.concat . content
 cleanContent :: [T.Text] -> [T.Text]
 cleanContent = filter (not . T.null) . (fmap $ T.strip)
 
-tagHeadlines :: [T.Text] -> IO [T.Text]
-tagHeadlines lines = do
-    tagger <- defaultTagger
-    return $ map (tagText tagger) lines
+tagHeadlines :: Tag t => IO (POSTagger t) -> [T.Text] -> IO [[TaggedSentence t]]
+tagHeadlines wrappedTagger lines =
+    wrappedTagger >>= \tagger ->
+    return $ (tag tagger) `fmap` lines
 
 -- Handle selected data from page.
 processData :: [T.Text] -> IO ()
 processData texts =
-    tagHeadlines (cleanContent texts) >>= \taggedLines ->
-    mapM_ putStrLn $ map T.unpack taggedLines
+    tagHeadlines brownTagger (cleanContent texts) >>= \taggedLines ->
+    mapM_ putStrLn $ map show taggedLines
 
 -- Get a Cursor for the specified URL.
 cursorFor :: String -> IO Cursor
